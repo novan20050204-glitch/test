@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>數學素養微課程：能擊中嗎？——二次函數圖形與極值互動探究</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* 自訂滑桿外觀 */
+    input[type=range] {
+      accent-color: #3b82f6;
+    }
+    /* 閃爍亮點 */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.15); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- 頂部導航列 -->
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50 px-4 py-2.5 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- 標題與教案資訊 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-black text-xl">
+          <i class="fa-solid fa-crosshairs"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-base md:text-lg tracking-wide text-white">數學素養微課程：能擊中嗎？</h1>
+            <span class="text-[11px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-bold">108課綱九下 1-1 ~ 1-2</span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">原案設計：劉建成、李慧玲、謝熹鈐 老師 ｜ 指導：楊凱琳 教授</p>
+        </div>
+      </div>
+
+      <!-- 四大微型活動切換按鈕 -->
+      <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 text-xs md:text-sm overflow-x-auto max-w-full">
+        <button id="navAct1" onclick="switchActivity(1)" class="px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap bg-blue-600 text-white shadow">
+          <span>一、砲彈路徑</span>
+        </button>
+        <button id="navAct2" onclick="switchActivity(2)" class="px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+          <span>二、函數關係式</span>
+        </button>
+        <button id="navAct3" onclick="switchActivity(3)" class="px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+          <span>三、同類系統(a)</span>
+        </button>
+        <button id="navAct4" onclick="switchActivity(4)" class="px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+          <span>四、圖形搬家了</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主體操作區域 -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-3 md:p-5 flex flex-col gap-4">
+
+    <!-- ========================================== -->
+    <!-- 微型活動一：砲彈發射路徑（心象建立與預測） -->
+    <!-- ========================================== -->
+    <div id="actSection1" class="flex flex-col lg:grid lg:grid-cols-12 gap-5">
+      <!-- 畫布區 (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col gap-3">
+        <div class="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col min-h-[440px] md:min-h-[500px]">
+          
+          <!-- 頂部即時提示浮動條 -->
+          <div class="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+            <div class="bg-slate-950/85 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs flex items-center gap-2 pointer-events-auto shadow-md">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-ping"></span>
+              <span class="text-slate-300">階段進度：</span>
+              <strong id="act1PhaseText" class="text-cyan-300 font-bold">1-1 空白盲測</strong>
+            </div>
+
+            <!-- 控制工具箱 -->
+            <div class="flex items-center gap-2 pointer-events-auto">
+              <button id="act1BtnGrid" onclick="toggleAct1Grid()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <i class="fa-solid fa-border-all"></i> <span id="act1GridLabel">開啟方格紙</span>
+              </button>
+              <button id="act1BtnAxis" onclick="toggleAct1Axis()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <i class="fa-solid fa-arrows-split-up-and-left"></i> <span id="act1AxisLabel">顯示對稱軸</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas 容器 -->
+          <div class="relative w-full flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/40">
+            <canvas id="act1Canvas" class="w-full h-full block cursor-pointer"></canvas>
+          </div>
+
+          <!-- 畫布底部軍艦選擇操作條 -->
+          <div class="bg-slate-950/90 border-t border-slate-800 p-3 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400 font-medium">請預測砲彈擊中哪艘軍艦：</span>
+              <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800">
+                <button onclick="guessShip('A')" class="guess-ship-btn px-2.5 py-1 rounded text-xs font-bold text-amber-300 hover:bg-amber-500/20">艦 A</button>
+                <button onclick="guessShip('B')" class="guess-ship-btn px-2.5 py-1 rounded text-xs font-bold text-emerald-300 hover:bg-emerald-500/20">艦 B</button>
+                <button onclick="guessShip('C')" class="guess-ship-btn px-2.5 py-1 rounded text-xs font-bold text-sky-300 hover:bg-sky-500/20">艦 C</button>
+                <button onclick="guessShip('D')" class="guess-ship-btn px-2.5 py-1 rounded text-xs font-bold text-purple-300 hover:bg-purple-500/20">艦 D</button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="fireAct1Projectile()" id="act1FireBtn" class="bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-lg shadow-rose-600/30 flex items-center gap-1.5 active:scale-95 transition">
+                <i class="fa-solid fa-bomb"></i> 發射砲彈！
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側學習單導引與對話 (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 class="font-bold text-base text-white flex items-center gap-2">
+              <i class="fa-solid fa-chalkboard-user text-blue-400"></i> 活動一：課堂鷹架引導
+            </h2>
+            <div class="flex items-center gap-1">
+              <button onclick="setAct1Step('1-1a')" id="stepBtn1_1a" class="px-2 py-1 rounded text-xs font-bold bg-blue-600 text-white" title="剛發射">1-1①</button>
+              <button onclick="setAct1Step('1-1b')" id="stepBtn1_1b" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="至最高點前">1-1②</button>
+              <button onclick="setAct1Step('1-1c')" id="stepBtn1_1c" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="至最高點（僅標示最高點）">1-1③</button>
+              <button onclick="setAct1Step('1-2a')" id="stepBtn1_2a" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="方格紙：剛發射">1-2①</button>
+              <button onclick="setAct1Step('1-2b')" id="stepBtn1_2b" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="方格紙：至最高點前">1-2②</button>
+              <button onclick="setAct1Step('1-2c')" id="stepBtn1_2c" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="方格紙：至最高點（僅標示最高點）">1-2③</button>
+              <button onclick="setAct1Step('1-3')" id="stepBtn1_3" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="對稱軸與推理">1-3</button>
+              <button onclick="setAct1Step('1-4')" id="stepBtn1_4" class="px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700" title="軍艦位移">1-4</button>
+            </div>
+          </div>
+
+          <div id="act1GuideCard" class="space-y-3 text-xs leading-relaxed">
+            <!-- 動態注入內容 -->
+          </div>
+
+          <!-- 思考素養小提示 -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+            <span class="text-amber-400 font-bold flex items-center gap-1.5">
+              <i class="fa-regular fa-lightbulb"></i> 課堂影片中的關鍵對話：
+            </span>
+            <blockquote class="italic text-slate-300 border-l-2 border-amber-500 pl-3 py-0.5" id="act1Quote">
+              「剛開始只有點與線，大家都是用猜的；但當我們有了方格紙、找到了最高點，你就能畫出對稱軸，這時落點就不是用猜的，而是有根據的幾何推理！」
+            </blockquote>
+          </div>
+
+          <!-- 學生互動探究紀錄 -->
+          <div class="bg-blue-950/20 border border-blue-500/20 rounded-xl p-3.5 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-blue-300 text-xs flex items-center gap-1">
+                <i class="fa-solid fa-pen-to-square"></i> 你的預測與理由記錄：
+              </span>
+              <span id="act1UserGuessStatus" class="font-bold text-slate-400 text-xs">尚未選擇</span>
+            </div>
+            <textarea id="act1ReasonInput" rows="2" placeholder="請寫下你預測擊中此軍艦的原因（例如：最高點位置、左右對稱格數等）..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+            <button onclick="recordAct1Reflection()" class="self-end bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
+              儲存我的推論
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 微型活動二：砲彈軌跡的二次函數關係式       -->
+    <!-- ========================================== -->
+    <div id="actSection2" class="hidden flex-col lg:grid lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-7 flex flex-col gap-3">
+        <div class="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col min-h-[460px] md:min-h-[500px]">
+          
+          <div class="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+            <div class="bg-slate-950/85 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs flex items-center gap-2 pointer-events-auto">
+              <span class="text-slate-300">坐標原點：</span>
+              <strong class="text-emerald-400 font-mono">最高點 O(0, 0)</strong>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-300">對稱軸：</span>
+              <strong class="text-sky-400 font-mono">y 軸 (x = 0)</strong>
+            </div>
+
+            <div class="flex items-center gap-2 pointer-events-auto">
+              <button id="btnFoldInk" onclick="toggleInkFold()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition">
+                <i class="fa-solid fa-file-contract"></i> <span id="inkFoldText">沿 x 軸對折印墨水</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="relative w-full flex-1 bg-slate-950">
+            <canvas id="act2Canvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <!-- 坐標點標記表 -->
+          <div class="bg-slate-950/95 border-t border-slate-800 p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-1.5 text-slate-300">
+              <span class="font-bold text-slate-400">已知5個格子點：</span>
+              <span class="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-rose-300">D(-2,-4)</span>
+              <span class="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-rose-300">B(-1,-1)</span>
+              <span class="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-emerald-300">O(0,0)</span>
+              <span class="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-rose-300">A(1,-1)</span>
+              <span class="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-rose-300">C(2,-4)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-amber-400 font-bold">若 x = 10，則 y = ?</span>
+              <input type="number" id="act2InputY10" placeholder="輸入 y 值" class="w-20 bg-slate-900 border border-slate-700 px-2 py-1 rounded text-center text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400">
+              <button onclick="checkAct2Calculation()" class="bg-amber-600 hover:bg-amber-500 text-white px-2.5 py-1 rounded font-bold text-xs transition">驗證</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側：代數推導與對折比較分析 (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <!-- 推導卡片 -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+          <h2 class="font-bold text-base text-white flex items-center gap-2 border-b border-slate-800 pb-2.5">
+            <i class="fa-solid fa-square-root-variable text-emerald-400"></i> 活動二：從點坐標找關係式
+          </h2>
+
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
+            <p class="font-bold text-slate-300">課堂觀察提問：</p>
+            <p class="text-slate-400">
+              很多同學一開始想用 <span class="text-rose-400 font-mono font-bold">y = ax + b</span> 來代，為什麼不合？<br>
+              <strong class="text-slate-200">學生發現：</strong>「因為相鄰兩點的垂直差距不是固定值（$-1, -3\dots$ 呈現等加速度數列），所以它是一條曲線！」
+            </p>
+            <div class="p-2.5 bg-blue-950/40 rounded border border-blue-500/30 font-mono text-center text-blue-300 font-bold text-sm">
+              y 與 x 的平方成相反數關係：y = -x²
+            </div>
+          </div>
+
+          <!-- 對折探究：有什麼一樣？有什麼不一樣？ -->
+          <div class="space-y-3">
+            <div class="font-bold text-xs text-indigo-300 flex items-center justify-between">
+              <span><i class="fa-solid fa-code-compare mr-1"></i> y = -x² 與 y = x² 的結構對比：</span>
+              <span class="text-[11px] text-slate-400 font-normal">教案 2-2 核心問題</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3 space-y-1.5">
+                <span class="font-bold text-emerald-400 flex items-center gap-1">
+                  <i class="fa-solid fa-circle-check"></i> 有什麼「一樣」？
+                </span>
+                <ul class="list-disc pl-4 text-slate-300 space-y-1">
+                  <li>頂點都是 <strong class="text-emerald-300 font-mono">(0, 0)</strong></li>
+                  <li>對稱軸都是 <strong class="text-emerald-300 font-mono">y 軸 (x=0)</strong></li>
+                  <li><strong class="text-emerald-300">開口大小</strong>（弧度完全重合）</li>
+                </ul>
+              </div>
+
+              <div class="bg-rose-950/30 border border-rose-500/30 rounded-xl p-3 space-y-1.5">
+                <span class="font-bold text-rose-400 flex items-center gap-1">
+                  <i class="fa-solid fa-circle-xmark"></i> 有什麼「不一樣」？
+                </span>
+                <ul class="list-disc pl-4 text-slate-300 space-y-1">
+                  <li><strong class="text-rose-300">開口方向</strong>（一上一向下）</li>
+                  <li><strong class="text-rose-300">極值種類</strong>（最高點 vs 最低點）</li>
+                  <li><strong class="text-rose-300 font-mono">x² 的係數正負</strong>（-1 與 +1）</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div id="act2FeedbackBox" class="p-3 bg-slate-800/80 rounded-xl text-xs text-slate-300 leading-relaxed">
+            點擊「沿 x 軸對折印墨水」按鈕，體驗影片中老師把紙對折後印出虛線對稱圖形的課堂實景！
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 微型活動三：你我同類嗎？（a值系統與四分區） -->
+    <!-- ========================================== -->
+    <div id="actSection3" class="hidden flex-col lg:grid lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-7 flex flex-col gap-3">
+        <div class="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col min-h-[460px] md:min-h-[500px]">
+          
+          <div class="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+            <div class="bg-slate-950/85 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs flex items-center gap-3 pointer-events-auto">
+              <span class="text-slate-300">開口狀態：</span>
+              <strong id="act3DirLabel" class="text-amber-300 font-bold">開口向上 (a > 0)</strong>
+              <span class="text-slate-600">|</span>
+              <span class="text-slate-300">基準線：</span>
+              <span class="text-rose-400 font-mono font-bold">y = x² (紅)</span>
+            </div>
+
+            <div class="flex items-center gap-2 pointer-events-auto">
+              <button onclick="toggleAct3Direction()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                <i class="fa-solid fa-arrows-up-down"></i> <span id="act3ToggleDirText">切換為開口向下 (a < 0)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="relative w-full flex-1 bg-slate-950">
+            <canvas id="act3Canvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <!-- 下方即時參數 a 滑桿微調 -->
+          <div class="bg-slate-950/90 border-t border-slate-800 p-3 flex items-center justify-between gap-4">
+            <div class="flex-1 flex items-center gap-3">
+              <label class="text-xs font-bold text-slate-300 whitespace-nowrap">探索任意 a 值：</label>
+              <input type="range" id="act3SliderA" min="-4" max="4" step="0.1" value="1" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+              <span id="act3ValA" class="font-mono text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 w-16 text-center">1.0</span>
+            </div>
+            <button onclick="resetAct3()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs">重置基準</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側：四分區批判性思考與判斷 (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+          <div class="border-b border-slate-800 pb-2.5">
+            <h2 class="font-bold text-base text-white flex items-center gap-2">
+              <i class="fa-solid fa-shapes text-amber-400"></i> 活動三：平面四分區推論挑戰
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              以基準線 <strong class="text-rose-400 font-mono">y = x²</strong> 為中心，將平面分為 ①、②、③、④ 四個區間。
+            </p>
+          </div>
+
+          <!-- 區域判斷互動題 -->
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <div class="font-bold text-amber-300 flex items-center justify-between">
+                <span>題目 1：y = 1000x² 會落在哪一區？</span>
+                <span id="resQ1" class="font-bold"></span>
+              </div>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="answerAct3Q(1, 1)" class="q-btn-1 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">① 區</button>
+                <button onclick="answerAct3Q(1, 2)" class="q-btn-1 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">② 區</button>
+                <button onclick="answerAct3Q(1, 3)" class="q-btn-1 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">③ 區</button>
+                <button onclick="answerAct3Q(1, 4)" class="q-btn-1 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">④ 區</button>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <div class="font-bold text-amber-300 flex items-center justify-between">
+                <span>題目 2：y = (1/1000)x² 會落在哪一區？</span>
+                <span id="resQ2" class="font-bold"></span>
+              </div>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="answerAct3Q(2, 1)" class="q-btn-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">① 區</button>
+                <button onclick="answerAct3Q(2, 2)" class="q-btn-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">② 區</button>
+                <button onclick="answerAct3Q(2, 3)" class="q-btn-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">③ 區</button>
+                <button onclick="answerAct3Q(2, 4)" class="q-btn-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">④ 區</button>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <div class="font-bold text-amber-300 flex items-center justify-between">
+                <span>題目 3：y = 1.5x² 會落在哪一區？</span>
+                <span id="resQ3" class="font-bold"></span>
+              </div>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="answerAct3Q(3, 1)" class="q-btn-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">① 區</button>
+                <button onclick="answerAct3Q(3, 2)" class="q-btn-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">② 區</button>
+                <button onclick="answerAct3Q(3, 3)" class="q-btn-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">③ 區</button>
+                <button onclick="answerAct3Q(3, 4)" class="q-btn-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 font-bold">④ 區</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 批判思考歸納盒：絕對值的必要性 -->
+          <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-xl p-3.5 text-xs space-y-2">
+            <span class="font-bold text-indigo-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation"></i> 精彩思辨：為什麼要加「絕對值」？
+            </span>
+            <p class="text-slate-300 leading-relaxed">
+              影片中有同學回答：「$a$ 越大，開口越小」，老師立刻追問：<br>
+              <span class="text-amber-300">「那 $a = -3$ 跟 $a = 2$，誰比較大？誰開口小？」</span><br>
+              學生因此察覺矛盾，發現負數比大小會與幾何寬窄產生衝突，最後齊聲結論：
+              <strong class="text-emerald-300">「必須加上絕對值 $|a|$！$|a|$ 愈大，開口愈小（愈陡峭狹窄）！」</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 微型活動四：二次函數圖形搬家了（平移與十字星陣）-->
+    <!-- ========================================== -->
+    <div id="actSection4" class="hidden flex-col gap-5">
+      <!-- 上半部：動態平移畫布與滑桿 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-7 relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex flex-col min-h-[440px]">
+          <div class="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+            <div class="bg-slate-950/85 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs flex items-center gap-2 pointer-events-auto">
+              <span class="text-slate-300">頂點坐標：</span>
+              <strong id="act4VertexReadout" class="text-emerald-400 font-mono font-bold">(0, 0)</strong>
+              <span class="text-slate-600">|</span>
+              <span class="text-slate-300">對稱軸：</span>
+              <strong id="act4AxisReadout" class="text-sky-400 font-mono font-bold">x = 0</strong>
+            </div>
+            <button onclick="resetAct4Sliders()" class="pointer-events-auto px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+              回到原點
+            </button>
+          </div>
+
+          <div class="relative w-full flex-1 bg-slate-950">
+            <canvas id="act4Canvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <div class="bg-slate-950/90 border-t border-slate-800 p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div>
+              <span class="text-slate-400">目前標準式：</span>
+              <span id="act4EquationDisplay" class="font-mono font-bold text-amber-300 text-sm">y = (x - 0)² + 0</span>
+            </div>
+            <div id="act4ShiftExplain" class="text-slate-300 text-[11px] bg-slate-800/80 px-2 py-1 rounded">
+              原母型圖形尚未平移
+            </div>
+          </div>
+        </div>
+
+        <!-- 平移滑桿與原理說明 -->
+        <div class="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-xl">
+          <div class="space-y-4">
+            <h2 class="font-bold text-base text-white flex items-center gap-2 border-b border-slate-800 pb-2.5">
+              <i class="fa-solid fa-arrows-up-down-left-right text-cyan-400"></i> 活動四：平移參數物理手掣
+            </h2>
+
+            <!-- 水平平移 h -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <label class="font-bold text-sky-300 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-sky-400"></span> 水平平移 h (左右移動)
+                </label>
+                <span id="act4ValH" class="font-mono font-bold text-sky-300 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">0</span>
+              </div>
+              <input type="range" id="act4SliderH" min="-9" max="9" step="1" value="0" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>左移 (x + |h|)²</span>
+                <span class="text-sky-300">令括號歸零找頂點</span>
+                <span>右移 (x - h)²</span>
+              </div>
+            </div>
+
+            <!-- 垂直平移 k -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <label class="font-bold text-emerald-300 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 垂直平移 k (上下移動)
+                </label>
+                <span id="act4ValK" class="font-mono font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">0</span>
+              </div>
+              <input type="range" id="act4SliderK" min="-8" max="8" step="1" value="0" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>下移 ( - |k| )</span>
+                <span class="text-emerald-300">極值高度 y = k</span>
+                <span>上移 ( + k )</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 解構矛盾知識卡 -->
+          <div class="bg-amber-950/20 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200 space-y-1">
+            <span class="font-bold text-amber-300 flex items-center gap-1">
+              <i class="fa-solid fa-key"></i> 學生最常卡關的思維盲點：
+            </span>
+            <p class="leading-relaxed">
+              向右明明是正向，為什麼是減去 9？<br>
+              <strong>教學亮點：</strong> 頂點本來在 $x=0$ 產生最小值 $0$。現在向右移到了 $9$，必須輸入 $x=9$ 才能讓括號內的 $(9 - 9) = 0$ 得到最低點，所以式子必須寫成 <span class="font-mono font-bold text-amber-400">(x - 9)²</span>！
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下半部：教案第13頁經典「十字星陣出題挑戰」與「落點評量」 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- 十字星陣 (7 cols) -->
+        <div class="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div>
+              <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-indigo-400"></i> 教案原著實作：A/B 小組十字星陣對戰
+              </h3>
+              <p class="text-xs text-slate-400">在對應箭頭填寫移動步數，考驗另一組能否求出搬家後的函數式與頂點！</p>
+            </div>
+            <button onclick="randomizeStarMatrix()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition">
+              隨機出題
+            </button>
+          </div>
+
+          <!-- 十字星陣互動容器 (對應教案 Page 13) -->
+          <div class="grid grid-cols-3 gap-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-center text-xs">
+            <!-- Top Left -->
+            <div class="p-2 bg-slate-900 rounded-lg border border-slate-800 flex flex-col items-center justify-center min-h-[70px]">
+              <span id="starBox_TL_eq" class="font-mono text-cyan-300 font-bold">y = (x+4)²+5</span>
+              <span id="starBox_TL_vt" class="text-[11px] text-slate-400">頂點 (-4, 5)</span>
+            </div>
+            <!-- Top Mid -->
+            <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
+              <span class="text-[10px] text-indigo-400 font-bold">▲ 上移 <strong id="starShift_Up" class="text-white">5</strong> 格</span>
+              <span id="starBox_TM_eq" class="font-mono text-emerald-300 font-bold">y = x² + 5</span>
+              <span id="starBox_TM_vt" class="text-[11px] text-slate-400">頂點 (0, 5)</span>
+            </div>
+            <!-- Top Right -->
+            <div class="p-2 bg-slate-900 rounded-lg border border-slate-800 flex flex-col items-center justify-center">
+              <span id="starBox_TR_eq" class="font-mono text-cyan-300 font-bold">y = (x-6)²+5</span>
+              <span id="starBox_TR_vt" class="text-[11px] text-slate-400">頂點 (6, 5)</span>
+            </div>
+
+            <!-- Mid Left -->
+            <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
+              <span class="text-[10px] text-sky-400 font-bold">◀ 左移 <strong id="starShift_Left" class="text-white">4</strong> 格</span>
+              <span id="starBox_ML_eq" class="font-mono text-sky-300 font-bold">y = (x+4)²</span>
+              <span id="starBox_ML_vt" class="text-[11px] text-slate-400">頂點 (-4, 0)</span>
+            </div>
+            <!-- Center Core -->
+            <div class="p-3 bg-gradient-to-br from-indigo-950 to-blue-950 border-2 border-blue-500 rounded-xl flex flex-col items-center justify-center shadow-lg">
+              <span class="text-[10px] text-blue-300 font-bold uppercase tracking-wider">原始母型</span>
+              <span class="font-mono font-black text-sm text-yellow-300">y = x²</span>
+              <span class="text-xs text-slate-300 font-bold">頂點 (0, 0)</span>
+            </div>
+            <!-- Mid Right -->
+            <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
+              <span class="text-[10px] text-sky-400 font-bold">▶ 右移 <strong id="starShift_Right" class="text-white">6</strong> 格</span>
+              <span id="starBox_MR_eq" class="font-mono text-sky-300 font-bold">y = (x-6)²</span>
+              <span id="starBox_MR_vt" class="text-[11px] text-slate-400">頂點 (6, 0)</span>
+            </div>
+
+            <!-- Bottom Left -->
+            <div class="p-2 bg-slate-900 rounded-lg border border-slate-800 flex flex-col items-center justify-center min-h-[70px]">
+              <span id="starBox_BL_eq" class="font-mono text-cyan-300 font-bold">y = (x+4)²-3</span>
+              <span id="starBox_BL_vt" class="text-[11px] text-slate-400">頂點 (-4, -3)</span>
+            </div>
+            <!-- Bottom Mid -->
+            <div class="p-2 bg-slate-900/90 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
+              <span class="text-[10px] text-rose-400 font-bold">▼ 下移 <strong id="starShift_Down" class="text-white">3</strong> 格</span>
+              <span id="starBox_BM_eq" class="font-mono text-rose-300 font-bold">y = x² - 3</span>
+              <span id="starBox_BM_vt" class="text-[11px] text-slate-400">頂點 (0, -3)</span>
+            </div>
+            <!-- Bottom Right -->
+            <div class="p-2 bg-slate-900 rounded-lg border border-slate-800 flex flex-col items-center justify-center">
+              <span id="starBox_BR_eq" class="font-mono text-cyan-300 font-bold">y = (x-6)²-3</span>
+              <span id="starBox_BR_vt" class="text-[11px] text-slate-400">頂點 (6, -3)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 砲彈最高點與落點評量題 (5 cols - 對應教案 Page 14) -->
+        <div class="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-3">
+          <div class="border-b border-slate-800 pb-2">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <i class="fa-solid fa-graduation-cap text-emerald-400"></i> 教案第 14 頁：軌跡落點即時評量
+            </h3>
+            <p class="text-xs text-slate-400">由式子直接透視砲彈的「最高點坐標」與「地面落點」</p>
+          </div>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="font-mono text-yellow-300 font-bold block">y = a(x - 5)² + 9</span>
+                <span class="text-[11px] text-slate-400">砲彈從 (0,0) 發射，已知 a = -9/25</span>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-300 block">最高點：<strong class="text-emerald-400 font-mono">(5, 9)</strong></span>
+                <span class="text-slate-300 block">落點：<strong class="text-sky-400 font-mono">(10, 0)</strong></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="font-mono text-yellow-300 font-bold block">y = a(x - 7)² + 6</span>
+                <span class="text-[11px] text-slate-400">砲彈從 (0,0) 發射，已知最高點 (7,6)</span>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-300 block">最高點：<strong class="text-emerald-400 font-mono">(7, 6)</strong></span>
+                <span class="text-slate-300 block">落點：<strong class="text-sky-400 font-mono">(14, 0)</strong></span>
+              </div>
+            </div>
+
+            <div class="p-3 bg-emerald-950/20 border border-emerald-500/30 rounded-xl text-emerald-300 space-y-1">
+              <span class="font-bold flex items-center gap-1">
+                <i class="fa-solid fa-check-double"></i> 素養結論總整理：
+              </span>
+              <p class="text-[11px] leading-relaxed text-slate-300">
+                只要知道砲彈的標準式 <span class="font-mono font-bold text-white">y = a(x - h)² + k</span>，頂點就是最高點 <span class="font-mono text-emerald-300">(h, k)</span>；又因對稱性，若從原點出發，落點必在對稱的 <span class="font-mono text-sky-300">(2h, 0)</span>！
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 底部版權與教學團隊誌謝 -->
+  <footer class="mt-auto border-t border-slate-900 bg-slate-950 py-3 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>本教具基於教育部素養導向微課程《能擊中嗎？》教案與課堂觀課影片數位轉譯建置</span>
+      <span>108 課綱九年級數學科 ｜ 二次函數圖形與極值</span>
+    </div>
+  </footer>
+
+  <!-- 互動核心邏輯 JS -->
+  <script>
+    // --- 全局狀態 ---
+    let currentActivity = 1;
+
+    // ==========================================
+    // 微型活動一 邏輯與畫布
+    // ==========================================
+    const act1 = {
+      step: '1-1a', // '1-1a', '1-1b', '1-1c', '1-2a', '1-2b', '1-2c', 3, 4
+      showGrid: false,
+      showAxis: false,
+      selectedShip: null,
+      animating: false,
+      progress: 0,
+      hitShip: null,
+      // 預設海面軍艦座標 (1-1 ~ 1-3 在地面 y=0)
+      baseShips: [
+        { id: 'A', name: '艦 A', x: 8, y: 0, color: '#f59e0b' },
+        { id: 'B', name: '艦 B', x: 10, y: 0, color: '#10b981' },
+        { id: 'C', name: '艦 C', x: 12, y: 0, color: '#0ea5e9' },
+        { id: 'D', name: '艦 D', x: 14, y: 0, color: '#a855f7' }
+      ],
+      // 1-4 專屬軍艦配置：移至高於發射處的 y=5 同一水平線上，精準命中艦 C (10, 5)
+      step4Ships: [
+        { id: 'A', name: '艦 A', x: 8, y: 5, color: '#f59e0b' },
+        { id: 'B', name: '艦 B', x: 9, y: 5, color: '#10b981' },
+        { id: 'C', name: '艦 C', x: 10, y: 5, color: '#0ea5e9' }, // 目標艦：高度 5，水平距離對稱 4 格精準命中
+        { id: 'D', name: '艦 D', x: 12, y: 5, color: '#a855f7' }
+      ],
+      hasFired: false, // 紀錄是否已經完成發射以保留完整軌跡
+      // 各步驟對應預設真實路徑參數 (從 x=0, y=0 發射)
+      // 假設最高點在 h, k，則 a = -k / (h^2)，落點在 2h
+      configs: {
+        '1-1a': { h: 6, k: 9, targetShip: 'C', revealRatio: 0.12, title: '1-1 第一部分：剛發射（初射軌跡）' },
+        '1-1b': { h: 6, k: 9, targetShip: 'C', revealRatio: 0.32, title: '1-1 第二部分：發射至最高點前（爬升彎曲）' },
+        '1-1c': { h: 6, k: 9, targetShip: 'C', revealRatio: 0.50, title: '1-1 第三部分：發射至最高點（僅標示最高點）' },
+        '1-2a': { h: 5, k: 10, targetShip: 'B', revealRatio: 0.15, title: '1-2 第一部分：方格紙輔助——剛發射' },
+        '1-2b': { h: 5, k: 10, targetShip: 'B', revealRatio: 0.35, title: '1-2 第二部分：方格紙輔助——至最高點前' },
+        '1-2c': { h: 5, k: 10, targetShip: 'B', revealRatio: 0.50, title: '1-2 第三部分：方格紙輔助——至最高點（僅標示最高點）' },
+        '1-3': { h: 4, k: 8, targetShip: 'A', revealRatio: 0.50, title: '1-3 探討對稱軸與推理（擊中艦 A）' },
+        '1-4': { h: 6, k: 9, targetShip: 'C', revealRatio: 0.50, title: '1-4 軍艦位移至 y=5 水平線：對稱推理（擊中艦 C）' }
+      }
+    };
+
+    const canvas1 = document.getElementById('act1Canvas');
+    const ctx1 = canvas1.getContext('2d');
+
+    function resizeCanvas1() {
+      const rect = canvas1.parentElement.getBoundingClientRect();
+      canvas1.width = rect.width * window.devicePixelRatio;
+      canvas1.height = rect.height * window.devicePixelRatio;
+      ctx1.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawAct1();
+    }
+
+    function getAct1Params() {
+      const cfg = act1.configs[act1.step];
+      const h = cfg.h;
+      const k = cfg.k;
+      const a = -k / (h * h);
+      // 1-4 擊中艦 C(10, 5) 即結束飛行，其餘擊中海平面(2h, 0)
+      const landingX = act1.step === '1-4' ? 10 : 2 * h;
+      return { a, h, k, landingX, cfg };
+    }
+
+    // 坐標轉換 (X: 0~16, Y: 0~12)
+    function toScreen1(x, y) {
+      const w = canvas1.width / window.devicePixelRatio;
+      const h = canvas1.height / window.devicePixelRatio;
+      const padding = 36;
+      const sx = padding + (x / 16) * (w - padding * 2);
+      const sy = (h - padding) - (y / 12) * (h - padding * 2);
+      return { x: sx, y: sy };
+    }
+
+    function drawAct1() {
+      const w = canvas1.width / window.devicePixelRatio;
+      const h = canvas1.height / window.devicePixelRatio;
+      ctx1.clearRect(0, 0, w, h);
+
+      const params = getAct1Params();
+
+      // 1. 繪製海平面底線
+      const seaY = toScreen1(0, 0).y;
+      ctx1.fillStyle = '#0f172a';
+      ctx1.fillRect(0, seaY, w, h - seaY);
+
+      ctx1.strokeStyle = '#38bdf8';
+      ctx1.lineWidth = 2.5;
+      ctx1.beginPath();
+      ctx1.moveTo(0, seaY);
+      ctx1.lineTo(w, seaY);
+      ctx1.stroke();
+
+      // 2. 繪製方格紙（若開啟）
+      if (act1.showGrid) {
+        ctx1.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+        ctx1.lineWidth = 1;
+        ctx1.fillStyle = '#64748b';
+        ctx1.font = '10px JetBrains Mono';
+
+        for (let gx = 0; gx <= 16; gx += 1) {
+          const pTop = toScreen1(gx, 12);
+          const pBot = toScreen1(gx, 0);
+          ctx1.beginPath();
+          ctx1.moveTo(pTop.x, pTop.y);
+          ctx1.lineTo(pBot.x, pBot.y);
+          ctx1.stroke();
+          if (gx % 2 === 0) ctx1.fillText(gx, pBot.x - 3, pBot.y + 14);
+        }
+
+        for (let gy = 0; gy <= 12; gy += 1) {
+          const pLeft = toScreen1(0, gy);
+          const pRight = toScreen1(16, gy);
+          ctx1.beginPath();
+          ctx1.moveTo(pLeft.x, pLeft.y);
+          ctx1.lineTo(pRight.x, pRight.y);
+          ctx1.stroke();
+          if (gy % 2 === 0 && gy > 0) ctx1.fillText(gy, pLeft.x - 16, pLeft.y + 3);
+        }
+      }
+
+      // 3. 繪製發射砲台
+      const launchPt = toScreen1(0, 0);
+      ctx1.save();
+      ctx1.fillStyle = '#475569';
+      ctx1.beginPath();
+      ctx1.arc(launchPt.x, launchPt.y, 8, 0, Math.PI * 2);
+      ctx1.fill();
+
+      // 砲管（切線斜率：在 x=0 處 dy/dx = -2*a*h）
+      const slope0 = -2 * params.a * params.h;
+      const angle0 = Math.atan(slope0);
+      ctx1.strokeStyle = '#94a3b8';
+      ctx1.lineWidth = 4;
+      ctx1.beginPath();
+      ctx1.moveTo(launchPt.x, launchPt.y);
+      ctx1.lineTo(launchPt.x + 18 * Math.cos(angle0), launchPt.y - 18 * Math.sin(angle0));
+      ctx1.stroke();
+      ctx1.restore();
+
+      // 4. 繪製軍艦 A, B, C, D (1-4 採用 step4Ships，全數部署於 y=5 水平線上)
+      const currentShips = act1.step === '1-4' ? act1.step4Ships : act1.baseShips;
+
+      currentShips.forEach(s => {
+        const sp = toScreen1(s.x, s.y);
+        const isTarget = s.id === params.cfg.targetShip;
+        const isChosen = s.id === act1.selectedShip;
+
+        // 若軍艦位於高於海平面 (y > 0) 且非 1-4（或單獨基座）繪製基座立柱
+        if (s.y > 0 && act1.step !== '1-4') {
+          const groundPt = toScreen1(s.x, 0);
+          ctx1.fillStyle = 'rgba(30, 41, 59, 0.85)';
+          ctx1.strokeStyle = '#475569';
+          ctx1.lineWidth = 1.5;
+          ctx1.beginPath();
+          ctx1.moveTo(sp.x - 16, groundPt.y);
+          ctx1.lineTo(sp.x - 12, sp.y);
+          ctx1.lineTo(sp.x + 12, sp.y);
+          ctx1.lineTo(sp.x + 16, groundPt.y);
+          ctx1.closePath();
+          ctx1.fill();
+          ctx1.stroke();
+        }
+
+        // 船身
+        ctx1.fillStyle = isChosen ? '#f43f5e' : (isTarget && act1.hitShip ? '#22c55e' : s.color);
+        ctx1.beginPath();
+        ctx1.moveTo(sp.x - 14, sp.y);
+        ctx1.lineTo(sp.x + 14, sp.y);
+        ctx1.lineTo(sp.x + 9, sp.y - 10);
+        ctx1.lineTo(sp.x - 9, sp.y - 10);
+        ctx1.closePath();
+        ctx1.fill();
+
+        // 桅杆
+        ctx1.strokeStyle = '#cbd5e1';
+        ctx1.lineWidth = 2;
+        ctx1.beginPath();
+        ctx1.moveTo(sp.x, sp.y - 10);
+        ctx1.lineTo(sp.x, sp.y - 20);
+        ctx1.stroke();
+
+        // 標籤：純粹顯示船名（如：艦 A、艦 B、艦 C、艦 D），不顯示坐標數字
+        ctx1.fillStyle = '#ffffff';
+        ctx1.font = 'bold 11px Noto Sans TC, sans-serif';
+        const labelText = s.name;
+        ctx1.fillText(labelText, sp.x - 12, sp.y + (s.y > 0 ? -24 : 26));
+      });
+
+      // 5. 繪製拋物線軌跡（依目前進度 revealRatio、動畫進度，或擊中後保持 1.0）
+      const maxT = act1.animating ? act1.progress : (act1.hasFired ? 1.0 : params.cfg.revealRatio);
+      const currentEndX = params.landingX * maxT;
+
+      if (currentEndX > 0.05) {
+        ctx1.save();
+        ctx1.beginPath();
+        let first = true;
+        const steps = 120;
+        for (let i = 0; i <= steps; i++) {
+          const x = (currentEndX / steps) * i;
+          const y = params.a * Math.pow(x - params.h, 2) + params.k;
+          const pt = toScreen1(x, Math.max(0, y));
+          if (first) {
+            ctx1.moveTo(pt.x, pt.y);
+            first = false;
+          } else {
+            ctx1.lineTo(pt.x, pt.y);
+          }
+        }
+
+        // 設定明亮顯眼的軌跡樣式並實體化描邊
+        ctx1.strokeStyle = '#f43f5e'; // 鮮明亮粉紅/亮紅
+        ctx1.lineWidth = 3.5;
+        ctx1.lineCap = 'round';
+        ctx1.lineJoin = 'round';
+        ctx1.shadowColor = 'rgba(244, 63, 94, 0.7)';
+        ctx1.shadowBlur = 8;
+        ctx1.stroke();
+        ctx1.shadowBlur = 0;
+
+        // 繪製軌跡最前端的砲彈彈頭光點
+        const endXMath = currentEndX;
+        const endYMath = Math.max(0, params.a * Math.pow(endXMath - params.h, 2) + params.k);
+        const headPt = toScreen1(endXMath, endYMath);
+
+        ctx1.beginPath();
+        ctx1.arc(headPt.x, headPt.y, 6, 0, Math.PI * 2);
+        ctx1.fillStyle = '#fbbf24';
+        ctx1.shadowColor = '#f59e0b';
+        ctx1.shadowBlur = 12;
+        ctx1.fill();
+
+        ctx1.beginPath();
+        ctx1.arc(headPt.x, headPt.y, 3, 0, Math.PI * 2);
+        ctx1.fillStyle = '#ffffff';
+        ctx1.fill();
+        ctx1.restore();
+      }
+
+      // 6. 繪製最高點與對稱軸
+      const isThirdSubstep = (act1.step === '1-1c' || act1.step === '1-2c' || act1.step === '1-3' || act1.step === '1-4');
+      const isEarlySubstep = (act1.step === '1-1a' || act1.step === '1-1b' || act1.step === '1-2a' || act1.step === '1-2b');
+
+      if (isThirdSubstep && !act1.showAxis) {
+        // 尚未開啟顯示對稱軸時，僅標示「最高點」，隱藏對稱軸與虛線、隱藏座標
+        const topPt = toScreen1(params.h, params.k);
+        ctx1.beginPath();
+        ctx1.arc(topPt.x, topPt.y, 6, 0, Math.PI * 2);
+        ctx1.fillStyle = '#10b981';
+        ctx1.fill();
+        ctx1.strokeStyle = '#ffffff';
+
+        ctx1.fillStyle = '#34d399';
+        ctx1.font = 'bold 11px Noto Sans TC, sans-serif';
+        ctx1.fillText(`最高點`, topPt.x + 8, topPt.y - 6);
+      } else if (act1.showAxis || (!isEarlySubstep && !isThirdSubstep && currentEndX >= params.h)) {
+        const topPt = toScreen1(params.h, params.k);
+        const botPt = toScreen1(params.h, 0);
+
+        // 對稱虛線
+        ctx1.setLineDash([4, 4]);
+        ctx1.strokeStyle = '#38bdf8';
+        ctx1.lineWidth = 2;
+        ctx1.beginPath();
+        ctx1.moveTo(topPt.x, topPt.y);
+        ctx1.lineTo(botPt.x, botPt.y);
+        ctx1.stroke();
+
+        // 1-4 特色輔助：繪製等高水平對稱線 (y = 5)，展現跨非同一水平線時兩側點與對稱軸距離相等的本質
+        if (act1.step === '1-4') {
+          const leftSymPt = toScreen1(2, 5);
+          const rightSymPt = toScreen1(10, 5);
+          ctx1.strokeStyle = '#f59e0b';
+          ctx1.lineWidth = 1.8;
+          ctx1.beginPath();
+          ctx1.moveTo(leftSymPt.x, leftSymPt.y);
+          ctx1.lineTo(rightSymPt.x, rightSymPt.y);
+          ctx1.stroke();
+
+          // 標記左側對稱點 (2, 5)
+          ctx1.beginPath();
+          ctx1.arc(leftSymPt.x, leftSymPt.y, 4.5, 0, Math.PI * 2);
+          ctx1.fillStyle = '#f59e0b';
+          ctx1.fill();
+          ctx1.strokeStyle = '#ffffff';
+          ctx1.lineWidth = 1.2;
+          ctx1.stroke();
+
+          ctx1.fillStyle = '#fde68a';
+          ctx1.font = 'bold 10px JetBrains Mono';
+          ctx1.fillText('距離 4 格', leftSymPt.x - 20, leftSymPt.y - 9);
+          ctx1.fillText('距離 4 格', rightSymPt.x - 20, rightSymPt.y - 9);
+        }
+
+        ctx1.setLineDash([]);
+
+        // 最高點圓圈
+        ctx1.beginPath();
+        ctx1.arc(topPt.x, topPt.y, 6, 0, Math.PI * 2);
+        ctx1.fillStyle = '#10b981';
+        ctx1.fill();
+        ctx1.strokeStyle = '#ffffff';
+        ctx1.lineWidth = 1.5;
+        ctx1.stroke();
+
+        ctx1.fillStyle = '#34d399';
+        ctx1.font = 'bold 11px Noto Sans TC';
+        ctx1.fillText(`最高點 (${params.h}, ${params.k})`, topPt.x + 8, topPt.y - 6);
+        ctx1.fillStyle = '#38bdf8';
+        ctx1.fillText(`對稱軸 x = ${params.h}`, botPt.x - 24, botPt.y + 14);
+      }
+    }
+
+    function setAct1Step(step) {
+      act1.step = String(step);
+      act1.progress = 0;
+      act1.animating = false;
+      act1.hasFired = false;
+      act1.hitShip = null;
+      act1.selectedShip = null;
+      act1.showAxis = false; // 切換步驟時重置對稱軸為關閉狀態
+
+      // 重置使用者選擇狀態提示與輸入框
+      const userGuessStatus = document.getElementById('act1UserGuessStatus');
+      if (userGuessStatus) userGuessStatus.innerHTML = '尚未選擇';
+      const reasonInput = document.getElementById('act1ReasonInput');
+      if (reasonInput) reasonInput.value = '';
+
+      // 重置發射按鈕
+      const fireBtn = document.getElementById('act1FireBtn');
+      if (fireBtn) {
+        fireBtn.disabled = false;
+        fireBtn.classList.remove('opacity-50');
+      }
+
+      const stepList = ['1-1a', '1-1b', '1-1c', '1-2a', '1-2b', '1-2c', '1-3', '1-4'];
+      stepList.forEach(s => {
+        const btnId = `stepBtn${s.replace('-', '_')}`;
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          if (s === act1.step) {
+            btn.className = 'px-2 py-1 rounded text-xs font-bold bg-blue-600 text-white shadow';
+          } else {
+            btn.className = 'px-2 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700';
+          }
+        }
+      });
+
+      const cfg = act1.configs[act1.step];
+      document.getElementById('act1PhaseText').textContent = cfg.title;
+
+      // 引導卡片內容切換
+      const guide = document.getElementById('act1GuideCard');
+      const quoteEl = document.getElementById('act1Quote');
+
+      if (act1.step === '1-1a') {
+        act1.showGrid = false;
+        guide.innerHTML = `
+          <div class="font-bold text-amber-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[11px] font-mono">1-1 Part 1</span>
+            第一部分：剛發射（初射軌跡）
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            砲彈剛剛衝出砲口，畫面上只有一小段紅色的微小軌跡，周遭沒有方格、沒有刻度。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-amber-400">課堂引導提問：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>此時你覺得能確定會打中哪一艘軍艦嗎？</li>
+              <li>現在大家是否只能靠「盲猜」或直覺？請先大膽在下方選擇一艘軍艦！</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「砲彈要發射出去之前，先請你在第一格猜一下，你覺得會打到哪一台軍艦？大家現在是不是真的都只能用猜的？」';
+      } else if (act1.step === '1-1b') {
+        act1.showGrid = false;
+        guide.innerHTML = `
+          <div class="font-bold text-sky-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 text-[11px] font-mono">1-1 Part 2</span>
+            第二部分：發射至最高點前（爬升彎曲）
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            砲彈繼續往前飛並向上攀升，但還<strong>沒有達到最高點</strong>。仔細觀察這段弧線的走勢！
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-sky-400">課堂核心提問：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>它飛出的路線是筆直的射線嗎？還是有向下彎曲的趨勢？</li>
+              <li>看到這段更長的弧線後，<strong>你想不想更改剛才預測的軍艦？</strong>更改或不更改的理由是什麼？</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「跑出來這樣……那你現在可以再猜一次，你覺得還會是原來的答案，還是你覺得它應該是換了一艘軍艦？」';
+      } else if (act1.step === '1-1c') {
+        act1.showGrid = false;
+        guide.innerHTML = `
+          <div class="font-bold text-emerald-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-mono">1-1 Part 3</span>
+            第三部分：發射至最高點（僅標示最高點）
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            砲彈剛好升到了<strong>最高點（頂點）</strong>，向上爬升的速度歸零，即將轉為下墜！畫面上僅標示出該最高點。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-emerald-400">重要思維轉折：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>雖然此時依然沒有方格紙與對稱軸輔助線，但有了「最高點」，你心中是否隱約能想像出後半段下落的「對稱形狀」？</li>
+              <li>此時你的預測是不是比 Part 1 有把握多了？但缺少精確量測工具時，我們還需要什麼工具輔助？（引導至 1-2 方格紙）</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「它到了最高點，大家心中開始有了一半的畫面。但沒有尺、沒有格子，我們怎麼能精準算出落點會落在多遠的距離？」';
+      } else if (act1.step === '1-2a') {
+        act1.showGrid = true;
+        guide.innerHTML = `
+          <div class="font-bold text-amber-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[11px] font-mono">1-2 Part 1</span>
+            第一部分：方格紙輔助——剛發射
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            引入學生最熟悉的工具——<strong>方格紙</strong>！此時砲彈剛衝出砲口，有了刻度與格線，觀察砲彈往上飛了幾格、往前移動了幾格。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-amber-400">課堂引導提問：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>有了方格紙之後，你能夠藉由數格子判斷砲彈大概會飛向哪艘軍艦嗎？</li>
+              <li>目前最高點位置與對稱軸皆已隱藏，請根據目前初段格線斜率進行初步預測！</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「剛剛都是空白的，你在看路線的時候是不是都真的是用猜的？現在我如果給你一個輔助工具——方格紙，有沒有辦法預測？」';
+      } else if (act1.step === '1-2b') {
+        act1.showGrid = true;
+        guide.innerHTML = `
+          <div class="font-bold text-sky-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 text-[11px] font-mono">1-2 Part 2</span>
+            第二部分：方格紙輔助——至最高點前
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            在方格紙上，砲彈軌跡延伸攀升，明顯呈現向上彎曲的走勢，即將接近頂峰。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-sky-400">課堂觀察提問：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>比對方格紙的水平格數與垂直高度變化，砲彈上升的速度是不是逐漸變慢？</li>
+              <li>此時你是否想修改軍艦預測？請依據格數走勢說明你的推論。</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「第二次再過去，到了這裡為止，你會不會是用猜的？看著方格紙上的曲線，你覺得它會落在哪裡？」';
+      } else if (act1.step === '1-2c') {
+        act1.showGrid = true;
+        guide.innerHTML = `
+          <div class="font-bold text-emerald-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-mono">1-2 Part 3</span>
+            第三部分：方格紙輔助——至最高點（僅標示最高點）
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            砲彈剛好升到了最高點，畫面上<strong>僅標示「最高點」</strong>，座標與對稱軸 $x=5$ 暫時隱藏。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-emerald-400">幾何對稱思考：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>利用方格紙數數看：從原點發射點到最高點的水平距離是幾格？</li>
+              <li>如果拋物線左右對稱，那麼從最高點落下到海平面，又應該向右前進幾格？</li>
+              <li>（若想驗證推論，可點擊上方「顯示對稱軸」按鈕展開座標與對稱線！）</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「現在最高點有沒有看到？只要經過了最高點，看拋物線經過的地方跟對稱軸的距離，對應到另外一邊，落點就出來了！」';
+      } else if (act1.step === '1-3') {
+        act1.showGrid = true;
+        guide.innerHTML = `
+          <div class="font-bold text-emerald-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-mono">1-3</span>
+            發射至最高點（僅標示最高點）與對稱推理
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            重新發射一發砲彈，此時砲彈剛好升至<strong>最高點</strong>（僅標示最高點，對稱軸與坐標暫時隱藏）。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-emerald-400">課堂提問與推理：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>數數方格紙：發射點 $(0, 0)$ 到最高點的水平距離是幾格？（答案：4 格）</li>
+              <li>若拋物線左右對稱，從最高點落回海面，水平方向還需再前進幾格？</li>
+              <li>$4 + 4 = 8$，此時砲彈最終會精準命中哪一艘軍艦？（點擊下方「艦 A」後發射驗證）</li>
+              <li>點擊上方<strong>「顯示對稱軸」</strong>按鈕，即可展開對稱虛線與坐標驗證！</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「從發射點到最高點是 4 格，那從最高點落到海面，也一定要往右走 4 格！4 + 4 = 8，不用猜，一定命中艦 A！」';
+      } else if (act1.step === '1-4') {
+        act1.showGrid = true;
+        guide.innerHTML = `
+          <div class="font-bold text-amber-300 text-sm flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[11px] font-mono">1-4 素養挑戰</span>
+            軍艦位置改變：非發射水平線上的對稱推理
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            敵軍艦隊全部退守至高於發射點的同一高度防線上，但艦 A、B、C、D 停泊在不同的水平位置。
+          </p>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 text-slate-300">
+            <strong class="text-amber-400">幾何對稱高階思維：</strong>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li>砲彈從 $(0, 0)$ 發射至最高點，畫面上<strong>僅標示最高點</strong>（對稱軸先行隱藏）。</li>
+              <li>觀察左側爬升過程：砲彈在什麼位置剛好達到與軍艦相同的高度？數數看它距離中間的最高點是幾格？</li>
+              <li>根據左右對稱性：砲彈越過最高點向右下落，回到相同高度時，距離對稱軸也必須是相同的格數！</li>
+              <li>數數方格紙：哪一艘軍艦正好位於對稱的落點位置？（請先在下方預測選擇）</li>
+              <li>點擊上方「顯示對稱軸」可展開橙色水平等高線與對稱軸，驗證推論！</li>
+            </ul>
+          </div>
+        `;
+        if (quoteEl) quoteEl.textContent = '「如果軍艦位置改變了，我們怎麼判斷？只要看它升到那個高度時跟對稱軸差幾格，落下來時也一樣差幾格！」';
+      }
+
+      updateAct1UI();
+      drawAct1();
+    }
+
+    function toggleAct1Grid() {
+      act1.showGrid = !act1.showGrid;
+      updateAct1UI();
+      drawAct1();
+    }
+
+    function toggleAct1Axis() {
+      act1.showAxis = !act1.showAxis;
+      updateAct1UI();
+      drawAct1();
+    }
+
+    function updateAct1UI() {
+      document.getElementById('act1GridLabel').textContent = act1.showGrid ? '關閉方格紙' : '開啟方格紙';
+      document.getElementById('act1AxisLabel').textContent = act1.showAxis ? '隱藏對稱軸' : '顯示對稱軸';
+      document.getElementById('act1BtnGrid').className = act1.showGrid ? 'px-2.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold' : 'px-2.5 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold';
+      document.getElementById('act1BtnAxis').className = act1.showAxis ? 'px-2.5 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-semibold' : 'px-2.5 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold';
+    }
+
+    function guessShip(id) {
+      act1.selectedShip = id;
+      document.getElementById('act1UserGuessStatus').innerHTML = `你預測：<span class="text-rose-400 font-bold">艦 ${id}</span>`;
+      drawAct1();
+    }
+
+    function recordAct1Reflection() {
+      const reason = document.getElementById('act1ReasonInput').value;
+      if (!act1.selectedShip) {
+        alert('請先在上方點擊選擇你預測的軍艦（A、B、C 或 D）！');
+        return;
+      }
+      alert(`已成功記錄你的推論！\n預測軍艦：艦 ${act1.selectedShip}\n推論理由：${reason || '未填寫理由'}`);
+    }
+
+    function fireAct1Projectile() {
+      if (act1.animating) return;
+      act1.animating = true;
+      act1.hasFired = true; // 標記已發射，之後保持全軌跡顯示
+      act1.progress = act1.configs[act1.step].revealRatio;
+
+      const btn = document.getElementById('act1FireBtn');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+
+      function anim() {
+        act1.progress += 0.015;
+        if (act1.progress >= 1.0) {
+          act1.progress = 1.0;
+          act1.animating = false;
+          btn.disabled = false;
+          btn.classList.remove('opacity-50');
+
+          const params = getAct1Params();
+          act1.hitShip = params.cfg.targetShip;
+          drawAct1();
+
+          // 稍微延遲彈出提示，讓學生先看清擊中軍艦的視覺瞬間
+          setTimeout(() => {
+            const isWin = act1.selectedShip === params.cfg.targetShip;
+            if (isWin) {
+              alert(`🎯 恭喜命中！砲彈完美擊中【艦 ${act1.hitShip}】！你的幾何對稱推理完全正確！`);
+            } else {
+              alert(`💥 砲彈擊中了【艦 ${act1.hitShip}】！\n你原本猜測的是【艦 ${act1.selectedShip || '未選擇'}】。觀察對稱軸與最高點的水平距離，看看為什麼它會落在這裡？`);
+            }
+          }, 60);
+          return;
+        }
+        drawAct1();
+        requestAnimationFrame(anim);
+      }
+      requestAnimationFrame(anim);
+    }
+
+    // ==========================================
+    // 微型活動二 邏輯與畫布 (y = -x^2 與墨水對折)
+    // ==========================================
+    const act2 = {
+      showInkFold: false,
+      foldRatio: 0, // 0 to 1
+      isFolding: false
+    };
+
+    const canvas2 = document.getElementById('act2Canvas');
+    const ctx2 = canvas2.getContext('2d');
+
+    function resizeCanvas2() {
+      const rect = canvas2.parentElement.getBoundingClientRect();
+      canvas2.width = rect.width * window.devicePixelRatio;
+      canvas2.height = rect.height * window.devicePixelRatio;
+      ctx2.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawAct2();
+    }
+
+    // 坐標轉換 (-4 to 4, -6 to 6)
+    function toScreen2(x, y) {
+      const w = canvas2.width / window.devicePixelRatio;
+      const h = canvas2.height / window.devicePixelRatio;
+      const sx = w / 2 + (x / 4) * (w * 0.42);
+      const sy = h / 2 - (y / 6) * (h * 0.42);
+      return { x: sx, y: sy };
+    }
+
+    function drawAct2() {
+      const w = canvas2.width / window.devicePixelRatio;
+      const h = canvas2.height / window.devicePixelRatio;
+      ctx2.clearRect(0, 0, w, h);
+
+      // 1. 方格底圖
+      ctx2.strokeStyle = 'rgba(51, 65, 85, 0.45)';
+      ctx2.lineWidth = 1;
+      for (let x = -4; x <= 4; x++) {
+        const p1 = toScreen2(x, -6);
+        const p2 = toScreen2(x, 6);
+        ctx2.beginPath();
+        ctx2.moveTo(p1.x, p1.y);
+        ctx2.lineTo(p2.x, p2.y);
+        ctx2.stroke();
+      }
+      for (let y = -6; y <= 6; y++) {
+        const p1 = toScreen2(-4, y);
+        const p2 = toScreen2(4, y);
+        ctx2.beginPath();
+        ctx2.moveTo(p1.x, p1.y);
+        ctx2.lineTo(p2.x, p2.y);
+        ctx2.stroke();
+      }
+
+      // 2. 坐標軸 (X軸 與 Y軸)
+      const origin = toScreen2(0, 0);
+      ctx2.strokeStyle = '#94a3b8';
+      ctx2.lineWidth = 2;
+      // X 軸
+      ctx2.beginPath();
+      ctx2.moveTo(20, origin.y);
+      ctx2.lineTo(w - 20, origin.y);
+      ctx2.stroke();
+      // Y 軸
+      ctx2.beginPath();
+      ctx2.moveTo(origin.x, 20);
+      ctx2.lineTo(origin.x, h - 20);
+      ctx2.stroke();
+
+      ctx2.fillStyle = '#cbd5e1';
+      ctx2.font = 'bold 12px JetBrains Mono';
+      ctx2.fillText('x', w - 18, origin.y - 8);
+      ctx2.fillText('y', origin.x + 8, 25);
+      ctx2.fillText('O(0,0)', origin.x + 6, origin.y + 16);
+
+      // 3. 繪製原砲彈軌跡 y = -x² (紅色實線)
+      ctx2.beginPath();
+      let first = true;
+      for (let x = -2.4; x <= 2.4; x += 0.05) {
+        const y = -Math.pow(x, 2);
+        const pt = toScreen2(x, y);
+        if (first) {
+          ctx2.moveTo(pt.x, pt.y);
+          first = false;
+        } else {
+          ctx2.lineTo(pt.x, pt.y);
+        }
+      }
+      ctx2.lineWidth = 3.5;
+      ctx2.strokeStyle = '#f43f5e';
+      ctx2.stroke();
+
+      // 標註 y = -x²
+      const labelPt = toScreen2(1.8, -3.24);
+      ctx2.fillStyle = '#f43f5e';
+      ctx2.font = 'bold 14px JetBrains Mono';
+      ctx2.fillText('y = -x²', labelPt.x + 10, labelPt.y);
+
+      // 5 個關鍵格子點
+      const points = [
+        { name: 'D(-2,-4)', x: -2, y: -4 },
+        { name: 'B(-1,-1)', x: -1, y: -1 },
+        { name: 'O(0,0)', x: 0, y: 0 },
+        { name: 'A(1,-1)', x: 1, y: -1 },
+        { name: 'C(2,-4)', x: 2, y: -4 }
+      ];
+
+      points.forEach(p => {
+        const sp = toScreen2(p.x, p.y);
+        ctx2.beginPath();
+        ctx2.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
+        ctx2.fillStyle = '#ffffff';
+        ctx2.fill();
+        ctx2.strokeStyle = '#f43f5e';
+        ctx2.lineWidth = 2;
+        ctx2.stroke();
+
+        ctx2.fillStyle = '#fecdd3';
+        ctx2.font = '10px JetBrains Mono';
+        ctx2.fillText(p.name, sp.x + (p.x < 0 ? -48 : 8), sp.y + (p.y === 0 ? -10 : 12));
+      });
+
+      // 4. 對折印墨水效果 (y = x² 虛線與對應點)
+      if (act2.foldRatio > 0) {
+        ctx2.save();
+        ctx2.globalAlpha = act2.foldRatio;
+
+        ctx2.setLineDash([5, 5]);
+        ctx2.beginPath();
+        let firstFold = true;
+        for (let x = -2.4; x <= 2.4; x += 0.05) {
+          const y = Math.pow(x, 2);
+          const pt = toScreen2(x, y);
+          if (firstFold) {
+            ctx2.moveTo(pt.x, pt.y);
+            firstFold = false;
+          } else {
+            ctx2.lineTo(pt.x, pt.y);
+          }
+        }
+        ctx2.lineWidth = 3;
+        ctx2.strokeStyle = '#818cf8'; // indigo-400
+        ctx2.stroke();
+        ctx2.setLineDash([]);
+
+        // 標註對折後的 y = x²
+        const foldLabel = toScreen2(1.8, 3.24);
+        ctx2.fillStyle = '#818cf8';
+        ctx2.font = 'bold 14px JetBrains Mono';
+        ctx2.fillText('y = x²', foldLabel.x + 10, foldLabel.y);
+
+        // 印上去的對稱點 V', B', A', D', C'
+        const foldPoints = [
+          { name: "D'(-2,4)", x: -2, y: 4 },
+          { name: "B'(-1,1)", x: -1, y: 1 },
+          { name: "A'(1,1)", x: 1, y: 1 },
+          { name: "C'(2,4)", x: 2, y: 4 }
+        ];
+
+        foldPoints.forEach(p => {
+          const sp = toScreen2(p.x, p.y);
+          ctx2.beginPath();
+          ctx2.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
+          ctx2.fillStyle = '#818cf8';
+          ctx2.fill();
+
+          ctx2.fillStyle = '#c7d2fe';
+          ctx2.font = '10px JetBrains Mono';
+          ctx2.fillText(p.name, sp.x + (p.x < 0 ? -48 : 8), sp.y - 8);
+        });
+
+        ctx2.restore();
+      }
+    }
+
+    function toggleInkFold() {
+      if (act2.isFolding) return;
+      act2.isFolding = true;
+      act2.showInkFold = !act2.showInkFold;
+
+      const target = act2.showInkFold ? 1 : 0;
+      const step = act2.showInkFold ? 0.05 : -0.05;
+
+      function foldAnim() {
+        act2.foldRatio += step;
+        if ((act2.showInkFold && act2.foldRatio >= 1) || (!act2.showInkFold && act2.foldRatio <= 0)) {
+          act2.foldRatio = target;
+          act2.isFolding = false;
+          document.getElementById('inkFoldText').textContent = act2.showInkFold ? '收起對折圖痕' : '沿 x 軸對折印墨水';
+          drawAct2();
+          return;
+        }
+        drawAct2();
+        requestAnimationFrame(foldAnim);
+      }
+      requestAnimationFrame(foldAnim);
+    }
+
+    function checkAct2Calculation() {
+      const val = parseFloat(document.getElementById('act2InputY10').value);
+      const box = document.getElementById('act2FeedbackBox');
+      if (isNaN(val)) {
+        box.innerHTML = `<span class="text-rose-400 font-bold">請先輸入數字！</span>`;
+        return;
+      }
+      if (val === -100) {
+        box.innerHTML = `
+          <div class="text-emerald-400 font-bold text-sm">🎉 太強了！完全正確！y = -100！</div>
+          <p class="text-slate-300 mt-1">
+            因為 y = -(10)² = -100。這說明了雖然方格紙畫不下，但透過代數式 <strong>y = -x²</strong>，我們可以精確推論出軌跡在任何遙遠位置的高度！這就是函數表徵的強大威力！
+          </p>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="text-rose-400 font-bold">答案不是 ${val} 喔！</div>
+          <p class="text-slate-300 mt-1">提示：觀察規律，當 x = 1 時 y = -1；x = 2 時 y = -4；x = 3 時 y = -9... y 永遠是 x 平方的相反數！再試算一次！</p>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 微型活動三 邏輯與畫布 (a值系統與四分區)
+    // ==========================================
+    const act3 = {
+      isPositive: true,
+      currentA: 1.0,
+      qAnswered: { 1: false, 2: false, 3: false }
+    };
+
+    const canvas3 = document.getElementById('act3Canvas');
+    const ctx3 = canvas3.getContext('2d');
+
+    function resizeCanvas3() {
+      const rect = canvas3.parentElement.getBoundingClientRect();
+      canvas3.width = rect.width * window.devicePixelRatio;
+      canvas3.height = rect.height * window.devicePixelRatio;
+      ctx3.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawAct3();
+    }
+
+    function toScreen3(x, y) {
+      const w = canvas3.width / window.devicePixelRatio;
+      const h = canvas3.height / window.devicePixelRatio;
+      const sx = w / 2 + (x / 3.5) * (w * 0.42);
+      const sy = act3.isPositive ? (h - 40) - (y / 8) * (h * 0.8) : 40 + (-y / 8) * (h * 0.8);
+      return { x: sx, y: sy };
+    }
+
+    function drawAct3() {
+      const w = canvas3.width / window.devicePixelRatio;
+      const h = canvas3.height / window.devicePixelRatio;
+      ctx3.clearRect(0, 0, w, h);
+
+      // 1. 坐標軸
+      const origin = toScreen3(0, 0);
+      ctx3.strokeStyle = '#475569';
+      ctx3.lineWidth = 1.5;
+      ctx3.beginPath();
+      ctx3.moveTo(20, origin.y);
+      ctx3.lineTo(w - 20, origin.y);
+      ctx3.stroke();
+
+      ctx3.beginPath();
+      ctx3.moveTo(origin.x, 20);
+      ctx3.lineTo(origin.x, h - 20);
+      ctx3.stroke();
+
+      const sign = act3.isPositive ? 1 : -1;
+
+      // 2. 繪製三條代表性曲線：
+      // 甲 (較陡，|a| = 2)
+      drawCurve(ctx3, 2 * sign, '#10b981', 2, '甲 (a = ' + (2 * sign) + ')');
+      // 基準紅線 (|a| = 1, y = x² 或 y = -x²)
+      drawCurve(ctx3, 1 * sign, '#f43f5e', 3.5, act3.isPositive ? 'y = x² (基準線)' : 'y = -x² (基準線)');
+      // 乙 (較寬，|a| = 0.5)
+      drawCurve(ctx3, 0.5 * sign, '#38bdf8', 2, '乙 (a = ' + (0.5 * sign) + ')');
+
+      // 3. 繪製使用者自訂任意滑桿 a 的動態曲線 (若不是預設)
+      if (Math.abs(act3.currentA) !== 1) {
+        drawCurve(ctx3, act3.currentA, '#fbbf24', 2.5, `當前 a = ${act3.currentA}`);
+      }
+
+      // 4. 繪製四分區數字 ①、②、③、④ 標籤
+      ctx3.font = 'bold 16px Noto Sans TC, sans-serif';
+      const refY = 4 * sign;
+      const pt1 = toScreen3(0.5, refY);
+      const pt2 = toScreen3(1.6, refY);
+      const pt3 = toScreen3(2.4, refY);
+      const pt4 = toScreen3(3.2, refY);
+
+      drawZoneBadge(ctx3, '①', pt1.x, pt1.y);
+      drawZoneBadge(ctx3, '②', pt2.x, pt2.y);
+      drawZoneBadge(ctx3, '③', pt3.x, pt3.y);
+      drawZoneBadge(ctx3, '④', pt4.x, pt4.y);
+    }
+
+    function drawZoneBadge(c, text, x, y) {
+      c.beginPath();
+      c.arc(x, y, 12, 0, Math.PI * 2);
+      c.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      c.fill();
+      c.strokeStyle = '#f59e0b';
+      c.lineWidth = 1.5;
+      c.stroke();
+      c.fillStyle = '#fef08a';
+      c.fillText(text, x - 7, y + 5);
+    }
+
+    function drawCurve(c, a, color, lineWidth, label) {
+      c.beginPath();
+      let first = true;
+      for (let x = -3.2; x <= 3.2; x += 0.05) {
+        const y = a * Math.pow(x, 2);
+        const pt = toScreen3(x, y);
+        if (first) {
+          c.moveTo(pt.x, pt.y);
+          first = false;
+        } else {
+          c.lineTo(pt.x, pt.y);
+        }
+      }
+      c.strokeStyle = color;
+      c.lineWidth = lineWidth;
+      c.stroke();
+
+      // 在末端寫標籤
+      const endPt = toScreen3(1.8, a * Math.pow(1.8, 2));
+      c.fillStyle = color;
+      c.font = 'bold 11px JetBrains Mono, sans-serif';
+      c.fillText(label, endPt.x + 6, endPt.y - 4);
+    }
+
+    function toggleAct3Direction() {
+      act3.isPositive = !act3.isPositive;
+      document.getElementById('act3DirLabel').textContent = act3.isPositive ? '開口向上 (a > 0)' : '開口向下 (a < 0)';
+      document.getElementById('act3ToggleDirText').textContent = act3.isPositive ? '切換為開口向下 (a < 0)' : '切換為開口向上 (a > 0)';
+      act3.currentA = (act3.isPositive ? 1 : -1) * Math.abs(act3.currentA);
+      document.getElementById('act3SliderA').value = act3.currentA;
+      document.getElementById('act3ValA').textContent = act3.currentA.toFixed(1);
+      drawAct3();
+    }
+
+    document.getElementById('act3SliderA').addEventListener('input', (e) => {
+      act3.currentA = parseFloat(e.target.value);
+      document.getElementById('act3ValA').textContent = act3.currentA.toFixed(1);
+      act3.isPositive = act3.currentA >= 0;
+      document.getElementById('act3DirLabel').textContent = act3.isPositive ? '開口向上 (a > 0)' : '開口向下 (a < 0)';
+      drawAct3();
+    });
+
+    function resetAct3() {
+      act3.currentA = act3.isPositive ? 1.0 : -1.0;
+      document.getElementById('act3SliderA').value = act3.currentA;
+      document.getElementById('act3ValA').textContent = act3.currentA.toFixed(1);
+      drawAct3();
+    }
+
+    function answerAct3Q(qNum, selectedZone) {
+      // 答案規則：
+      // Q1: y = 1000x^2 (a = 1000 > 2) -> ① 區最貼近 y 軸
+      // Q2: y = (1/1000)x^2 (a = 0.001 < 0.5) -> ④ 區最開闊扁平
+      // Q3: y = 1.5x^2 (1 < 1.5 < 2) -> ② 區（介於甲與基準線之間）
+      const correctAnswers = { 1: 1, 2: 4, 3: 2 };
+      const resEl = document.getElementById(`resQ${qNum}`);
+
+      const buttons = document.querySelectorAll(`.q-btn-${qNum}`);
+      buttons.forEach((btn, idx) => {
+        if (idx + 1 === selectedZone) {
+          if (selectedZone === correctAnswers[qNum]) {
+            btn.className = `q-btn-${qNum} py-1.5 rounded bg-emerald-600 text-white font-bold`;
+          } else {
+            btn.className = `q-btn-${qNum} py-1.5 rounded bg-rose-600 text-white font-bold`;
+          }
+        } else {
+          btn.className = `q-btn-${qNum} py-1.5 rounded bg-slate-800 text-slate-400 font-bold`;
+        }
+      });
+
+      if (selectedZone === correctAnswers[qNum]) {
+        resEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>答對了！</span>`;
+      } else {
+        resEl.innerHTML = `<span class="text-rose-400 font-bold"><i class="fa-solid fa-xmark mr-1"></i>再想想看</span>`;
+      }
+    }
+
+    // ==========================================
+    // 微型活動四 邏輯與畫布 (平移與十字星陣)
+    // ==========================================
+    const act4 = {
+      h: 0,
+      k: 0
+    };
+
+    const canvas4 = document.getElementById('act4Canvas');
+    const ctx4 = canvas4.getContext('2d');
+
+    function resizeCanvas4() {
+      const rect = canvas4.parentElement.getBoundingClientRect();
+      canvas4.width = rect.width * window.devicePixelRatio;
+      canvas4.height = rect.height * window.devicePixelRatio;
+      ctx4.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawAct4();
+    }
+
+    function toScreen4(x, y) {
+      const w = canvas4.width / window.devicePixelRatio;
+      const h = canvas4.height / window.devicePixelRatio;
+      const sx = w / 2 + (x / 12) * (w * 0.44);
+      const sy = h / 2 - (y / 10) * (h * 0.44);
+      return { x: sx, y: sy };
+    }
+
+    function drawAct4() {
+      const w = canvas4.width / window.devicePixelRatio;
+      const h = canvas4.height / window.devicePixelRatio;
+      ctx4.clearRect(0, 0, w, h);
+
+      // 1. 格線
+      ctx4.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+      ctx4.lineWidth = 1;
+      for (let x = -10; x <= 10; x += 2) {
+        const p1 = toScreen4(x, -9);
+        const p2 = toScreen4(x, 9);
+        ctx4.beginPath();
+        ctx4.moveTo(p1.x, p1.y);
+        ctx4.lineTo(p2.x, p2.y);
+        ctx4.stroke();
+      }
+      for (let y = -8; y <= 8; y += 2) {
+        const p1 = toScreen4(-11, y);
+        const p2 = toScreen4(11, y);
+        ctx4.beginPath();
+        ctx4.moveTo(p1.x, p1.y);
+        ctx4.lineTo(p2.x, p2.y);
+        ctx4.stroke();
+      }
+
+      // 2. 坐標軸
+      const origin = toScreen4(0, 0);
+      ctx4.strokeStyle = '#64748b';
+      ctx4.lineWidth = 1.8;
+      ctx4.beginPath();
+      ctx4.moveTo(15, origin.y);
+      ctx4.lineTo(w - 15, origin.y);
+      ctx4.stroke();
+
+      ctx4.beginPath();
+      ctx4.moveTo(origin.x, 15);
+      ctx4.lineTo(origin.x, h - 15);
+      ctx4.stroke();
+
+      // 3. 繪製原始母型虛線 y = x² (原點頂點)
+      ctx4.setLineDash([4, 4]);
+      ctx4.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx4.lineWidth = 2;
+      ctx4.beginPath();
+      let firstBase = true;
+      for (let x = -3.2; x <= 3.2; x += 0.1) {
+        const pt = toScreen4(x, Math.pow(x, 2));
+        if (firstBase) { ctx4.moveTo(pt.x, pt.y); firstBase = false; }
+        else ctx4.lineTo(pt.x, pt.y);
+      }
+      ctx4.stroke();
+      ctx4.setLineDash([]);
+
+      // 4. 繪製平移後的曲線 y = (x - h)^2 + k
+      ctx4.beginPath();
+      let firstShift = true;
+      for (let x = act4.h - 3.4; x <= act4.h + 3.4; x += 0.05) {
+        const y = Math.pow(x - act4.h, 2) + act4.k;
+        const pt = toScreen4(x, y);
+        if (firstShift) { ctx4.moveTo(pt.x, pt.y); firstShift = false; }
+        else ctx4.lineTo(pt.x, pt.y);
+      }
+      ctx4.lineWidth = 3.5;
+      ctx4.strokeStyle = '#38bdf8';
+      ctx4.shadowColor = 'rgba(56, 189, 248, 0.4)';
+      ctx4.shadowBlur = 10;
+      ctx4.stroke();
+      ctx4.shadowBlur = 0;
+
+      // 5. 對稱軸虛線 x = h
+      const vPt = toScreen4(act4.h, act4.k);
+      const topPt = toScreen4(act4.h, 9);
+      const botPt = toScreen4(act4.h, -9);
+
+      ctx4.setLineDash([3, 3]);
+      ctx4.strokeStyle = '#34d399';
+      ctx4.lineWidth = 1.5;
+      ctx4.beginPath();
+      ctx4.moveTo(topPt.x, topPt.y);
+      ctx4.lineTo(botPt.x, botPt.y);
+      ctx4.stroke();
+      ctx4.setLineDash([]);
+
+      // 頂點圓圈 (h, k)
+      ctx4.beginPath();
+      ctx4.arc(vPt.x, vPt.y, 6, 0, Math.PI * 2);
+      ctx4.fillStyle = '#10b981';
+      ctx4.fill();
+      ctx4.strokeStyle = '#ffffff';
+      ctx4.lineWidth = 2;
+      ctx4.stroke();
+
+      ctx4.fillStyle = '#6ee7b7';
+      ctx4.font = 'bold 12px JetBrains Mono';
+      ctx4.fillText(`頂點 (${act4.h}, ${act4.k})`, vPt.x + 8, vPt.y - 8);
+    }
+
+    function updateAct4UI() {
+      document.getElementById('act4ValH').textContent = act4.h;
+      document.getElementById('act4ValK').textContent = act4.k;
+      document.getElementById('act4VertexReadout').textContent = `(${act4.h}, ${act4.k})`;
+      document.getElementById('act4AxisReadout').textContent = `x = ${act4.h}`;
+
+      // 格式化方程式文字
+      const hStr = act4.h === 0 ? 'x²' : (act4.h > 0 ? `(x - ${act4.h})²` : `(x + ${Math.abs(act4.h)})²`);
+      const kStr = act4.k === 0 ? '' : (act4.k > 0 ? ` + ${act4.k}` : ` - ${Math.abs(act4.k)}`);
+      document.getElementById('act4EquationDisplay').textContent = `y = ${hStr}${kStr || ' + 0'}`;
+
+      let shiftMsg = [];
+      if (act4.h > 0) shiftMsg.push(`向右平移 ${act4.h} 單位`);
+      if (act4.h < 0) shiftMsg.push(`向左平移 ${Math.abs(act4.h)} 單位`);
+      if (act4.k > 0) shiftMsg.push(`向上平移 ${act4.k} 單位`);
+      if (act4.k < 0) shiftMsg.push(`向下平移 ${Math.abs(act4.k)} 單位`);
+
+      document.getElementById('act4ShiftExplain').textContent = shiftMsg.length > 0 ? shiftMsg.join('、') : '原母型圖形尚未平移';
+    }
+
+    document.getElementById('act4SliderH').addEventListener('input', (e) => {
+      act4.h = parseInt(e.target.value);
+      updateAct4UI();
+      drawAct4();
+    });
+
+    document.getElementById('act4SliderK').addEventListener('input', (e) => {
+      act4.k = parseInt(e.target.value);
+      updateAct4UI();
+      drawAct4();
+    });
+
+    function resetAct4Sliders() {
+      act4.h = 0;
+      act4.k = 0;
+      document.getElementById('act4SliderH').value = 0;
+      document.getElementById('act4SliderK').value = 0;
+      updateAct4UI();
+      drawAct4();
+    }
+
+    // 隨機十字星陣出題產生器
+    function randomizeStarMatrix() {
+      const up = Math.floor(Math.random() * 6) + 2;
+      const down = Math.floor(Math.random() * 6) + 2;
+      const left = Math.floor(Math.random() * 6) + 2;
+      const right = Math.floor(Math.random() * 6) + 2;
+
+      document.getElementById('starShift_Up').textContent = up;
+      document.getElementById('starShift_Down').textContent = down;
+      document.getElementById('starShift_Left').textContent = left;
+      document.getElementById('starShift_Right').textContent = right;
+
+      // Top Mid
+      document.getElementById('starBox_TM_eq').textContent = `y = x² + ${up}`;
+      document.getElementById('starBox_TM_vt').textContent = `頂點 (0, ${up})`;
+
+      // Bottom Mid
+      document.getElementById('starBox_BM_eq').textContent = `y = x² - ${down}`;
+      document.getElementById('starBox_BM_vt').textContent = `頂點 (0, -${down})`;
+
+      // Mid Left
+      document.getElementById('starBox_ML_eq').textContent = `y = (x+${left})²`;
+      document.getElementById('starBox_ML_vt').textContent = `頂點 (-${left}, 0)`;
+
+      // Mid Right
+      document.getElementById('starBox_MR_eq').textContent = `y = (x-${right})²`;
+      document.getElementById('starBox_MR_vt').textContent = `頂點 (${right}, 0)`;
+
+      // Four Corners
+      document.getElementById('starBox_TL_eq').textContent = `y = (x+${left})²+${up}`;
+      document.getElementById('starBox_TL_vt').textContent = `頂點 (-${left}, ${up})`;
+
+      document.getElementById('starBox_TR_eq').textContent = `y = (x-${right})²+${up}`;
+      document.getElementById('starBox_TR_vt').textContent = `頂點 (${right}, ${up})`;
+
+      document.getElementById('starBox_BL_eq').textContent = `y = (x+${left})²-${down}`;
+      document.getElementById('starBox_BL_vt').textContent = `頂點 (-${left}, -${down})`;
+
+      document.getElementById('starBox_BR_eq').textContent = `y = (x-${right})²-${down}`;
+      document.getElementById('starBox_BR_vt').textContent = `頂點 (${right}, -${down})`;
+    }
+
+    // ==========================================
+    // 模組切換總控制器
+    // ==========================================
+    function switchActivity(num) {
+      currentActivity = num;
+
+      // 頁籤按鈕高亮
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`navAct${i}`);
+        const sec = document.getElementById(`actSection${i}`);
+        if (i === num) {
+          btn.className = 'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap bg-blue-600 text-white shadow';
+          sec.classList.remove('hidden');
+          sec.classList.add('flex');
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white';
+          sec.classList.add('hidden');
+          sec.classList.remove('flex');
+        }
+      }
+
+      // 重繪對應畫布
+      setTimeout(() => {
+        if (num === 1) resizeCanvas1();
+        else if (num === 2) resizeCanvas2();
+        else if (num === 3) resizeCanvas3();
+        else if (num === 4) resizeCanvas4();
+      }, 50);
+    }
+
+    // 視窗自適應縮放
+    window.addEventListener('resize', () => {
+      if (currentActivity === 1) resizeCanvas1();
+      else if (currentActivity === 2) resizeCanvas2();
+      else if (currentActivity === 3) resizeCanvas3();
+      else if (currentActivity === 4) resizeCanvas4();
+    });
+
+    // 初始化啟動
+    window.onload = function() {
+      setAct1Step('1-1a');
+      resizeCanvas1();
+    };
+  </script>
+</body>
+</html>
